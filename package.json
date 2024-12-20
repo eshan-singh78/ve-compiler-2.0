@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/eshan-singh78/ve-compiler-2.0"
   },
-  "keywords": [],
+  "keywords": ["compiler","c","c++","java","python","gcc","javac"],
   "author": "",
   "license": "ISC",
   "dependencies": {
