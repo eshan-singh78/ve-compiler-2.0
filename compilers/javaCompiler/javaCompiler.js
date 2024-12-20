@@ -6,8 +6,6 @@ const executeJava = async (filepath, jobId) => {
   try {
     const codebasePath = path.join(__dirname, "../../codebase");
     const outFilePath = path.join(codebasePath, `${jobId}.out`);
-    console.log("CodebasePath:", codebasePath);
-    console.log("OutFilePath:", outFilePath);
 
     if (!fs.existsSync(codebasePath)) {
       fs.mkdirSync(codebasePath, { recursive: true });
@@ -15,17 +13,29 @@ const executeJava = async (filepath, jobId) => {
 
     let code = fs.readFileSync(filepath, "utf8");
 
-    if (code.includes("public class")) {
-      code = code.replace(/public class /, `class ${jobId}`);
-      fs.writeFileSync(filepath, code);
+    const classNameMatch = code.match(/class\s+(\w+)/);
+
+    let className = jobId.replace(/-/g, '');
+
+    if (/^\d/.test(className)) {
+      className = "Class_" + className;
     }
+
+    if (classNameMatch) {
+      code = code.replace(new RegExp(`class\\s+${classNameMatch[1]}`), `class ${className}`);
+    } else {
+      code = `public class ${className} {\n` + code.substring(code.indexOf("{"));
+    }
+
+    const newFilePath = path.join(codebasePath, `${jobId}.java`);
+    fs.writeFileSync(newFilePath, code);
+    filepath = newFilePath;
 
     const compilationCommand = `javac ${filepath}`;
     await execPromise(compilationCommand);
 
-    const executionCommand = `java -cp ${codebasePath} ${jobId}`;
+    const executionCommand = `java -cp ${codebasePath} ${className}`;
     const { stdout, stderr } = await execPromise(executionCommand);
-    console.log(stdout);
 
     return { outFilePath, stdout };
   } catch (error) {

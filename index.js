@@ -66,7 +66,8 @@ const CompileFile = async (language, code) => {
     if (language === "cpp") {
       return await executeCpp(safeFilepath);
     } else if (language === "java") {
-      return await executeJava(safeFilepath);
+      const sanitizedJobId = `Class_${jobId.replace(/-/g, '')}`;
+      return await executeJava(safeFilepath, sanitizedJobId);
     } else if (language === "js") {
       return await executeJavaScript(safeFilepath);
     } else if (language === "py") {
