@@ -167,6 +167,5 @@ Contributions are welcome! Please feel free to open issues or submit pull reques
 ## Important!
 
 When using the Java compiler, we request that you send the class name as `"Main"` for it to function properly. This feature will be enhanced in future updates.
-```
 
 This update reflects the enhancements and fixes for version 2.0, highlighting the active maintenance and bug fixes of the package.
