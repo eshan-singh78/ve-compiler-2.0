@@ -12,7 +12,7 @@ const testCompile = async () => {
     console.log("C++ Compilation Output:", cppResult);
 
     console.log("Testing Java Compilation...");
-    const javaCode = `public class Main {
+    const javaCode = `public class World {
       public static void main(String[] args) {
         System.out.println("Hello from Java");
       }

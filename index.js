@@ -43,7 +43,7 @@ const CompileFile = async (language, code) => {
         filename = `${jobId}.cpp`;
         break;
       case "java":
-        filename = "Main.java";
+        filename = `${jobId}.java`;
         break;
       case "js":
         filename = `${jobId}.js`;
