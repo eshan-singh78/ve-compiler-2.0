@@ -1,0 +1,16 @@
+{
+  "name": "ve-compiler-2.0",
+  "version": "1.0.0",
+  "description": "Upgraded version of this package - https://www.npmjs.com/package/ve-compiler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nanoid": "^5.0.9",
+    "uuid": "^11.0.3"
+  }
+}
