@@ -6,50 +6,76 @@ const { executeJavaScript } = require("./compilers/jsCompiler/jscompiler");
 const { executePython } = require("./compilers/pyCompiler/pythonCompiler");
 const { v4: uuid } = require("uuid");
 const { executeC } = require("./compilers/cCompiler/cCompiler");
-const { compileFunction } = require("vm");
 
-const output = "output";
 const dirCodes = path.join(__dirname, "codeBase");
 
 if (!fs.existsSync(dirCodes)) {
   fs.mkdirSync(dirCodes, { recursive: true });
 }
 
-const CompileFile = async (language, code) => {
-  let jobId;
-  if (language === "cpp") {
-    jobId = uuid();
-    const filename = `${jobId}.cpp`;
-    const filepath = path.join(dirCodes, filename);
-    fs.writeFileSync(filepath, code);
-    return await executeCpp(filepath);
-  } else if (language === "java") {
-    jobId = "Main";
-    const filename = `${jobId}.java`;
-    const filepath = path.join(dirCodes, filename);
-    fs.writeFileSync(filepath, code);
-    return await executeJava(filepath);
-  } else if (language === "js") {
-    jobId = uuid();
-    const filename = `${jobId}.js`;
-    const filepath = path.join(dirCodes, filename);
-    fs.writeFileSync(filepath, code);
-    return await executeJavaScript(filepath);
-  } else if (language === "py") {
-    jobId = uuid();
-    const filename = `${jobId}.py`;
-    const filepath = path.join(dirCodes, filename);
-    fs.writeFileSync(filepath, code);
-    return await executePython(filepath);
-  } else if (language === "c") {
-    jobId = uuid();
-    const filename = `${jobId}.c`;
-    const filepath = path.join(dirCodes, filename);
-    fs.writeFileSync(filepath, code);
-    return await executeC(filepath);
+const safePath = (filepath) => {
+  const normalizedPath = path.normalize(filepath);
+  if (!normalizedPath.startsWith(dirCodes)) {
+    throw new Error("Invalid file path detected.");
   }
-  else {
-    throw new Error(`Unsupported language: ${language}. Supported languages are: cpp, java, js, py, c.`);
+  return normalizedPath;
+};
+
+const CompileFile = async (language, code) => {
+  const supportedLanguages = ["cpp", "java", "js", "py", "c"];
+
+  if (!supportedLanguages.includes(language)) {
+    throw new Error(`Unsupported language: ${language}`);
+  }
+
+  if (typeof code !== "string") {
+    throw new Error("Invalid code input: Code must be a string.");
+  }
+
+  let jobId;
+  let filename;
+  let filepath;
+
+  try {
+    jobId = uuid();
+    switch (language) {
+      case "cpp":
+        filename = `${jobId}.cpp`;
+        break;
+      case "java":
+        filename = "Main.java";
+        break;
+      case "js":
+        filename = `${jobId}.js`;
+        break;
+      case "py":
+        filename = `${jobId}.py`;
+        break;
+      case "c":
+        filename = `${jobId}.c`;
+        break;
+      default:
+        throw new Error(`Unsupported language: ${language}`);
+    }
+
+    filepath = path.join(dirCodes, filename);
+    const safeFilepath = safePath(filepath);
+
+    fs.writeFileSync(safeFilepath, code);
+
+    if (language === "cpp") {
+      return await executeCpp(safeFilepath);
+    } else if (language === "java") {
+      return await executeJava(safeFilepath);
+    } else if (language === "js") {
+      return await executeJavaScript(safeFilepath);
+    } else if (language === "py") {
+      return await executePython(safeFilepath);
+    } else if (language === "c") {
+      return await executeC(safeFilepath);
+    }
+  } catch (error) {
+    throw new Error(`Compilation failed: ${error.message}`);
   }
 };
 

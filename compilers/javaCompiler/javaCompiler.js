@@ -4,7 +4,7 @@ const path = require("path");
 
 const executeJava = async (filepath) => {
   try {
-    const jobId = "Main"; //path.basename(filepath).split(".")[0];
+    const jobId = "Main"; 
     const codebasePath = path.join(__dirname, "../../codebase");
     console.log("CodebasePath:", codebasePath);
     const outFilePath = path.join(codebasePath, `${jobId}`);

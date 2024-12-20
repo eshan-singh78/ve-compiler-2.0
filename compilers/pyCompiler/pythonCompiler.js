@@ -1,5 +1,3 @@
-
-
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
@@ -15,11 +13,11 @@ const executePython = async (filepath) => {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    const executionCommand = `python ${filepath}`;
+    const executionCommand = `python3 ${filepath}`;
     const { stdout, stderr } = await execPromise(executionCommand);
     console.log(stdout);
 
-    return { outFilePath, stdout }; // Return both outFilePath and stdout
+    return { outFilePath, stdout }; 
   } catch (error) {
     throw new Error(`Execution error: ${error}`);
   }

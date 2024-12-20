@@ -13,7 +13,7 @@ const executeC = async (filepath) => {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    const compilationCommand = `gcc ${filepath} -o ${outFilePath}`; // Use gcc for compiling C code
+    const compilationCommand = `gcc ${filepath} -o ${outFilePath}`; 
     console.log(filepath);
     await execPromise(compilationCommand);
 
@@ -21,7 +21,7 @@ const executeC = async (filepath) => {
     const { stdout, stderr } = await execPromise(executionCommand);
     console.log(stdout);
 
-    return { outFilePath, stdout }; // Return both outFilePath and stdout
+    return { outFilePath, stdout }; 
   } catch (error) {
     throw new Error(`Compilation or execution error: ${error}`);
   }
