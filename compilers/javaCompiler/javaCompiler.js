@@ -21,10 +21,10 @@ const executeJava = async (filepath) => {
     const { stdout, stderr } = await execPromise(executionCommand);
     console.log(stdout);
 
-    return { outFilePath, stdout }; // Return stdout along with outFilePath
+    return { outFilePath, stdout }; 
   } catch (error) {
     console.log("Error", error);
-    throw error; // Re-throw error to handle it in the caller
+    throw error; 
   }
 };
 

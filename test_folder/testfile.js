@@ -1,4 +1,4 @@
-const { CompileFile } = require("./index");
+const { CompileFile } = require("../index");
 
 const testCompile = async () => {
   try {
