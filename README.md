@@ -134,7 +134,7 @@ export default App;
 
 ```javascript
 const express = require('express');
-const { CompileFile } = require('ve-compiler');
+const { CompileFile } = require('ve-compiler-2.0');
 const cors = require('cors');
 
 const app = express();
