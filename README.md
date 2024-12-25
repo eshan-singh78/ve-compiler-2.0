@@ -23,7 +23,7 @@ VE-Compiler is a versatile JavaScript package that provides a solution for compi
 You can install the package via npm:
 
 ```bash
-npm install ve-compiler
+npm install ve-compiler-2.0
 ```
 
 ## Usage
