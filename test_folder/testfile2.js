@@ -34,6 +34,24 @@ const testCompile = async () => {
     const cResult = await CompileFile("c", cCode);
     console.log("C Compilation Output:", cResult);
 
+    console.log("Testing Rust Compilation...");
+    const rustFilePath = path.join(__dirname, "example.rs");
+    const rustCode = fs.readFileSync(rustFilePath, "utf8");
+    const rustResult = await CompileFile("rs", rustCode);
+    console.log("Rust Compilation Output:", rustResult);
+
+    console.log("Testing Lua Compilation...");
+    const luaFilePath = path.join(__dirname, "example.lua");
+    const luaCode = fs.readFileSync(luaFilePath, "utf8");
+    const luaResult = await CompileFile("lua", luaCode);
+    console.log("Lua Compilation Output:", luaResult);
+
+    console.log("Testing Go Compilation...");
+    const goFilePath = path.join(__dirname, "example.go");
+    const goCode = fs.readFileSync(goFilePath, "utf8");
+    const goResult = await CompileFile("go", goCode);
+    console.log("Go Compilation Output:", goResult);
+
   } catch (error) {
     console.error("Error during compilation:", error.message);
   }

@@ -38,7 +38,30 @@ const testCompile = async () => {
     }`;
     const cResult = await CompileFile("c", cCode);
     console.log("C Compilation Output:", cResult);
-    
+
+    console.log("Testing Rust Compilation...");
+    const rustCode = `fn main() {
+      println!("Hello from Rust");
+    }`;
+    const rustResult = await CompileFile("rs", rustCode);
+    console.log("Rust Compilation Output:", rustResult);
+
+    console.log("Testing Lua Compilation...");
+    const luaCode = `print("Hello from Lua")`;
+    const luaResult = await CompileFile("lua", luaCode);
+    console.log("Lua Compilation Output:", luaResult);
+
+    console.log("Testing Go Compilation...");
+    const goCode = `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello from Go")
+}`;
+    const goResult = await CompileFile("go", goCode);
+    console.log("Go Compilation Output:", goResult);
+
   } catch (error) {
     console.error("Error during compilation:", error.message);
   }

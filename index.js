@@ -4,6 +4,9 @@ const { executeCpp } = require("./compilers/cppCompiler/cppCompiler");
 const { executeJava } = require("./compilers/javaCompiler/javaCompiler");
 const { executeJavaScript } = require("./compilers/jsCompiler/jscompiler");
 const { executePython } = require("./compilers/pyCompiler/pythonCompiler");
+const { executeGo } = require("./compilers/goCompiler/goCompiler");
+const { executeLua } = require("./compilers/luaCompiler/luaCompiler");
+const { executeRust } = require("./compilers/rsCompiler/rustCompiler");
 const { v4: uuid } = require("uuid");
 const { executeC } = require("./compilers/cCompiler/cCompiler");
 
@@ -22,7 +25,7 @@ const safePath = (filepath) => {
 };
 
 const CompileFile = async (language, code) => {
-  const supportedLanguages = ["cpp", "java", "js", "py", "c"];
+  const supportedLanguages = ["cpp", "java", "js", "py", "c", "go", "lua", "rs"];
 
   if (!supportedLanguages.includes(language)) {
     throw new Error(`Unsupported language: ${language}`);
@@ -54,6 +57,15 @@ const CompileFile = async (language, code) => {
       case "c":
         filename = `${jobId}.c`;
         break;
+      case "go":
+        filename = `${jobId}.go`;
+        break;
+      case "lua":
+        filename = `${jobId}.lua`;
+        break;
+      case "rs":
+        filename = `${jobId}.rs`;
+        break;
       default:
         throw new Error(`Unsupported language: ${language}`);
     }
@@ -74,6 +86,12 @@ const CompileFile = async (language, code) => {
       return await executePython(safeFilepath);
     } else if (language === "c") {
       return await executeC(safeFilepath);
+    } else if (language === "go") {
+      return await executeGo(safeFilepath);
+    } else if (language === "lua") {
+      return await executeLua(safeFilepath);
+    } else if (language === "rs") {
+      return await executeRust(safeFilepath);
     }
   } catch (error) {
     throw new Error(`Compilation failed: ${error.message}`);
