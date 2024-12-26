@@ -10,7 +10,7 @@ VE-Compiler is a versatile JavaScript package that provides a solution for compi
 
 ## Features
 
-- **Multi-Language Support:** Compile code written in C++, Java, JavaScript, Python, and C.
+- **Multi-Language Support:** Compile code written in C++, Java, JavaScript, Python, C, Rust, Lua and Go.
 - **Unified Interface:** A simplified API for compiling code snippets in different languages.
 - **Enhanced Error Handling:** Detailed error messages are provided in case of compilation errors.
 - **Output Generation:** Returns compiled output for successful compilations.
@@ -34,6 +34,9 @@ npm install ve-compiler-2.0
 - `"js"`
 - `"py"`
 - `"java"`
+- `"rs"`
+- `"go"`
+- `"lua"`
 
 ### Example with Pure Node.js
 
