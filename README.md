@@ -41,7 +41,7 @@ npm install ve-compiler-2.0
 ### Example with Pure Node.js
 
 ```javascript
-const { CompileFile } = require('ve-compiler');
+const { CompileFile } = require('ve-compiler-2.0');
 
 CompileFile(
     "c",
