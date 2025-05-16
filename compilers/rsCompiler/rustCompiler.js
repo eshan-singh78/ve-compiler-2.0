@@ -1,28 +1,23 @@
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const executeRust = async (filepath) => {
+const executeRust = async (filepath, input = "") => {
   try {
     const jobId = path.basename(filepath).split(".")[0];
     const codebasePath = path.join(__dirname, "../../codebase");
-    console.log("CodebasePath:", codebasePath);
-    const outFilePath = path.join(codebasePath, `${jobId}`); 
-    console.log("OutFilePath:", outFilePath);
 
     if (!fs.existsSync(codebasePath)) {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    const compilationCommand = `rustc ${filepath} -o ${outFilePath}`; 
-    console.log(filepath);
+    const outFilePath = path.join(codebasePath, `${jobId}`);
+    
+    const compilationCommand = `rustc ${filepath} -o ${outFilePath}`;
     await execPromise(compilationCommand);
 
-    const executionCommand = `${outFilePath}`;
-    const { stdout, stderr } = await execPromise(executionCommand);
-    console.log(stdout);
-
-    return { outFilePath, stdout }; 
+    const { stdout, stderr } = await runExecutableWithInput(outFilePath, input);
+    return { outFilePath, stdout, stderr };
   } catch (error) {
     throw new Error(`Compilation or execution error: ${error}`);
   }
@@ -38,6 +33,37 @@ const execPromise = (command) => {
       }
       resolve({ stdout, stderr });
     });
+  });
+};
+
+const runExecutableWithInput = (executablePath, input = "") => {
+  return new Promise((resolve, reject) => {
+    const process = spawn(executablePath, []);
+
+    let stdout = "";
+    let stderr = "";
+
+    process.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    process.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    process.on("error", reject);
+
+    process.on("close", (code) => {
+      if (code !== 0) {
+        return reject(new Error(`Process exited with code ${code}, stderr: ${stderr}`));
+      }
+      resolve({ stdout, stderr });
+    });
+
+    if (input) {
+      process.stdin.write(input);
+    }
+    process.stdin.end();
   });
 };
 

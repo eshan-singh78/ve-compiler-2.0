@@ -1,37 +1,52 @@
-const { exec } = require("child_process");
+const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const executeLua = async (filepath) => {
+const executeLua = async (filepath, input = "") => {
   try {
     const jobId = path.basename(filepath).split(".")[0];
     const codebasePath = path.join(__dirname, "../../codebase");
-    console.log("CodebasePath:", codebasePath);
 
     if (!fs.existsSync(codebasePath)) {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    const executionCommand = `lua ${filepath}`; 
-    const { stdout, stderr } = await execPromise(executionCommand);
-
-    console.log("Lua Output:", stdout);
-    return { stdout, stderr }; 
+    const { stdout, stderr } = await runLuaWithInput(filepath, input);
+    return { stdout, stderr };
   } catch (error) {
     throw new Error(`Execution error: ${error}`);
   }
 };
 
-const execPromise = (command) => {
+const runLuaWithInput = (filepath, input = "") => {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error("Execution Error:", error);
-        reject(error);
-        return;
+    const process = spawn("lua", [filepath]);
+
+    let stdout = "";
+    let stderr = "";
+
+    process.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    process.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    process.on("error", reject);
+
+    process.on("close", (code) => {
+      if (code !== 0) {
+        return reject(new Error(`Lua process exited with code ${code}, stderr: ${stderr}`));
       }
       resolve({ stdout, stderr });
     });
+
+    if (input) {
+      process.stdin.write(input);
+    }
+
+    process.stdin.end();
   });
 };
 

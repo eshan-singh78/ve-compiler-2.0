@@ -24,7 +24,7 @@ const safePath = (filepath) => {
   return normalizedPath;
 };
 
-const CompileFile = async (language, code) => {
+const CompileFile = async (language, code, input = "", cleanup = true) => {
   const supportedLanguages = ["cpp", "java", "js", "py", "c", "go", "lua", "rs"];
 
   if (!supportedLanguages.includes(language)) {
@@ -75,25 +75,30 @@ const CompileFile = async (language, code) => {
 
     fs.writeFileSync(safeFilepath, code);
 
-    if (language === "cpp") {
-      return await executeCpp(safeFilepath);
-    } else if (language === "java") {
-      const sanitizedJobId = `Class_${jobId.replace(/-/g, '')}`;
-      return await executeJava(safeFilepath, sanitizedJobId);
-    } else if (language === "js") {
-      return await executeJavaScript(safeFilepath);
-    } else if (language === "py") {
-      return await executePython(safeFilepath);
-    } else if (language === "c") {
-      return await executeC(safeFilepath);
-    } else if (language === "go") {
-      return await executeGo(safeFilepath);
-    } else if (language === "lua") {
-      return await executeLua(safeFilepath);
-    } else if (language === "rs") {
-      return await executeRust(safeFilepath);
+    const langMap = {
+      cpp: executeCpp,
+      java: (file, input) => executeJava(file, `Class_${jobId.replace(/-/g, '')}`, input),
+      js: executeJavaScript,
+      py: executePython,
+      c: executeC,
+      go: executeGo,
+      lua: executeLua,
+      rs: executeRust,
+    };
+
+    const executor = langMap[language];
+    const result = await executor(safeFilepath, input);
+
+    if (cleanup) {
+      fs.unlinkSync(safeFilepath);
     }
+
+    return result;
+
   } catch (error) {
+    if (filepath && fs.existsSync(filepath) && cleanup) {
+      fs.unlinkSync(filepath);
+    }
     throw new Error(`Compilation failed: ${error.message}`);
   }
 };

@@ -1,41 +1,72 @@
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const executeGo = async (filepath) => {
+const executeGo = async (filepath, input = "") => {
   try {
-    const jobId = path.basename(filepath).split(".")[0];
     const codebasePath = path.join(__dirname, "../../codebase");
-    console.log("CodebasePath:", codebasePath);
-
     if (!fs.existsSync(codebasePath)) {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    const executionCommand = `go run ${filepath}`;
-    const { stdout, stderr } = await execPromise(executionCommand);
+    // Prepare output binary path
+    const jobId = path.basename(filepath).split(".")[0];
+    const binaryPath = path.join(codebasePath, jobId);
 
-    console.log(stdout);
+    // Compile Go code
+    await execPromise(`go build -o ${binaryPath} ${filepath}`);
 
-    return { stdout, stderr }; 
+    // Run the binary and pipe input
+    const execGoProcess = () =>
+      new Promise((resolve, reject) => {
+        const child = spawn(binaryPath);
+
+        let stdout = "";
+        let stderr = "";
+
+        child.stdout.on("data", (data) => {
+          stdout += data.toString();
+        });
+
+        child.stderr.on("data", (data) => {
+          stderr += data.toString();
+        });
+
+        child.on("error", (err) => {
+          reject(err);
+        });
+
+        child.on("close", (code) => {
+          if (code !== 0) {
+            reject(new Error(`Process exited with code ${code}, stderr: ${stderr}`));
+          } else {
+            resolve({ stdout, stderr });
+          }
+        });
+
+        if (input) {
+          child.stdin.write(input.endsWith("\n") ? input : input + "\n");
+        }
+        child.stdin.end();
+      });
+
+    const { stdout, stderr } = await execGoProcess();
+
+    return { stdout, stderr };
   } catch (error) {
-    throw new Error(`Execution error: ${error}`);
+    throw new Error(`Compilation or execution error: ${error.message || error}`);
   }
 };
 
-const execPromise = (command) => {
-  return new Promise((resolve, reject) => {
+const execPromise = (command) =>
+  new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.error("Error:", error);
-        reject(stderr || error.message);
+        reject(new Error(stderr || error.message));
         return;
       }
       resolve({ stdout, stderr });
     });
   });
-};
 
-module.exports = {
-  executeGo,
-};
+module.exports = { executeGo };
