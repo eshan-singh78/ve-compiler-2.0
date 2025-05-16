@@ -24,6 +24,17 @@ const safePath = (filepath) => {
   return normalizedPath;
 };
 
+// Cleanup all files inside the folder but keep the folder
+const clearCodeBaseFolder = () => {
+  const files = fs.readdirSync(dirCodes);
+  for (const file of files) {
+    const filePath = path.join(dirCodes, file);
+    if (fs.lstatSync(filePath).isFile()) {
+      fs.unlinkSync(filePath);
+    }
+  }
+};
+
 const CompileFile = async (language, code, input = "", cleanup = true) => {
   const supportedLanguages = ["cpp", "java", "js", "py", "c", "go", "lua", "rs"];
 
@@ -90,14 +101,14 @@ const CompileFile = async (language, code, input = "", cleanup = true) => {
     const result = await executor(safeFilepath, input);
 
     if (cleanup) {
-      fs.unlinkSync(safeFilepath);
+      clearCodeBaseFolder();
     }
 
     return result;
 
   } catch (error) {
     if (filepath && fs.existsSync(filepath) && cleanup) {
-      fs.unlinkSync(filepath);
+      clearCodeBaseFolder();
     }
     throw new Error(`Compilation failed: ${error.message}`);
   }
