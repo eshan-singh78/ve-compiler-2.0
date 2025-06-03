@@ -42,8 +42,12 @@ const runLuaWithInput = (filepath, input = "") => {
       resolve({ stdout, stderr });
     });
 
+
     if (input) {
-      process.stdin.write(input);
+      const lines = Array.isArray(input) ? input : [input];
+      for (const line of lines) {
+        process.stdin.write(line + "\n");
+      }
     }
 
     process.stdin.end();

@@ -16,25 +16,26 @@ const executeC = async (filepath, input = "") => {
     await execPromise(compilationCommand);
 
     const executionResult = await runWithInput(outFilePath, input);
-
     return { outFilePath, stdout: executionResult.stdout };
   } catch (error) {
-    throw new Error(`Compilation or execution error: ${error.message}`);
+    throw new Error(`C Compilation or Execution Error: ${error.message}`);
   }
 };
 
 const execPromise = (command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
-      if (error) return reject(error);
+      if (error) {
+        return reject(new Error(`GCC Error: ${stderr || error.message}`));
+      }
       resolve({ stdout, stderr });
     });
   });
 };
 
-const runWithInput = (commandPath, input) => {
+const runWithInput = (commandPath, input = "") => {
   return new Promise((resolve, reject) => {
-    const process = spawn(commandPath, [], { stdio: ["pipe", "pipe", "pipe"] });
+    const process = spawn(commandPath, []);
 
     let stdout = "";
     let stderr = "";
@@ -57,7 +58,11 @@ const runWithInput = (commandPath, input) => {
     });
 
 
-    process.stdin.write(input);
+    const lines = Array.isArray(input) ? input : [input];
+    for (const line of lines) {
+      process.stdin.write(line + "\n");
+    }
+
     process.stdin.end();
   });
 };

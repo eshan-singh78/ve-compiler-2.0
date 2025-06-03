@@ -9,52 +9,15 @@ const executeGo = async (filepath, input = "") => {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-
     const jobId = path.basename(filepath).split(".")[0];
     const binaryPath = path.join(codebasePath, jobId);
 
-
     await execPromise(`go build -o ${binaryPath} ${filepath}`);
 
-
-    const execGoProcess = () =>
-      new Promise((resolve, reject) => {
-        const child = spawn(binaryPath);
-
-        let stdout = "";
-        let stderr = "";
-
-        child.stdout.on("data", (data) => {
-          stdout += data.toString();
-        });
-
-        child.stderr.on("data", (data) => {
-          stderr += data.toString();
-        });
-
-        child.on("error", (err) => {
-          reject(err);
-        });
-
-        child.on("close", (code) => {
-          if (code !== 0) {
-            reject(new Error(`Process exited with code ${code}, stderr: ${stderr}`));
-          } else {
-            resolve({ stdout, stderr });
-          }
-        });
-
-        if (input) {
-          child.stdin.write(input.endsWith("\n") ? input : input + "\n");
-        }
-        child.stdin.end();
-      });
-
-    const { stdout, stderr } = await execGoProcess();
-
-    return { stdout, stderr };
+    const executionResult = await runWithInput(binaryPath, input);
+    return { stdout: executionResult.stdout, stderr: executionResult.stderr };
   } catch (error) {
-    throw new Error(`Compilation or execution error: ${error.message || error}`);
+    throw new Error(`Go Compilation or Execution Error: ${error.message || error}`);
   }
 };
 
@@ -62,11 +25,44 @@ const execPromise = (command) =>
   new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        reject(new Error(stderr || error.message));
-        return;
+        return reject(new Error(stderr || error.message));
       }
       resolve({ stdout, stderr });
     });
   });
 
-module.exports = { executeGo };
+const runWithInput = (binaryPath, input = "") => {
+  return new Promise((resolve, reject) => {
+    const process = spawn(binaryPath, [], { stdio: ["pipe", "pipe", "pipe"] });
+
+    let stdout = "";
+    let stderr = "";
+
+    process.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    process.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    process.on("error", reject);
+
+    process.on("close", (code) => {
+      if (code !== 0) {
+        return reject(new Error(`Process exited with code ${code}, stderr: ${stderr}`));
+      }
+      resolve({ stdout, stderr });
+    });
+
+    const lines = Array.isArray(input) ? input : [input];
+    for (const line of lines) {
+      process.stdin.write(line + "\n");
+    }
+    process.stdin.end();
+  });
+};
+
+module.exports = {
+  executeGo,
+};

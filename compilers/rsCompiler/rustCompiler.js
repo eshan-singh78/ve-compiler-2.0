@@ -12,7 +12,6 @@ const executeRust = async (filepath, input = "") => {
     }
 
     const outFilePath = path.join(codebasePath, `${jobId}`);
-    
     const compilationCommand = `rustc ${filepath} -o ${outFilePath}`;
     await execPromise(compilationCommand);
 
@@ -27,8 +26,7 @@ const execPromise = (command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.error(error);
-        reject(error);
+        reject(new Error(`Compilation failed: ${stderr || error.message}`));
         return;
       }
       resolve({ stdout, stderr });
@@ -55,14 +53,19 @@ const runExecutableWithInput = (executablePath, input = "") => {
 
     process.on("close", (code) => {
       if (code !== 0) {
-        return reject(new Error(`Process exited with code ${code}, stderr: ${stderr}`));
+        return reject(new Error(`Rust program exited with code ${code}, stderr: ${stderr}`));
       }
       resolve({ stdout, stderr });
     });
 
+
     if (input) {
-      process.stdin.write(input);
+      const lines = Array.isArray(input) ? input : [input];
+      for (const line of lines) {
+        process.stdin.write(line + "\n");
+      }
     }
+
     process.stdin.end();
   });
 };
