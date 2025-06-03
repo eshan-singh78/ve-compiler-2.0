@@ -1,6 +1,6 @@
 {
   "name": "ve-compiler-2.0",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Upgraded version of this package - https://www.npmjs.com/package/ve-compiler",
   "main": "index.js",
   "scripts": {
