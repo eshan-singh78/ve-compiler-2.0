@@ -9,14 +9,14 @@ const executeGo = async (filepath, input = "") => {
       fs.mkdirSync(codebasePath, { recursive: true });
     }
 
-    // Prepare output binary path
+
     const jobId = path.basename(filepath).split(".")[0];
     const binaryPath = path.join(codebasePath, jobId);
 
-    // Compile Go code
+
     await execPromise(`go build -o ${binaryPath} ${filepath}`);
 
-    // Run the binary and pipe input
+
     const execGoProcess = () =>
       new Promise((resolve, reject) => {
         const child = spawn(binaryPath);
